@@ -1,0 +1,50 @@
+[project]
+name = "app"
+version = "0.0.0"
+description = "APP just for fun"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.129.0",
+    "orjson>=3.11.7",
+    "pydantic-settings>=2.13.1",
+    "sqlmodel>=0.0.37",
+    "uvicorn[standard]>=0.41.0",
+]
+
+[dependency-groups]
+dev = [
+    "faker>=40.5.1",
+    "ruff>=0.14.10",
+    "uv>=0.10.4",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+src = ["app"]
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = []
+select = ["E", "F", "I", "N", "UP", "ANN", "ASYNC", "B", "A", "C4", "G", "PIE", "Q", "SIM", "ARG", "PTH", "PL", "PERF"]
+ignore = ["S", "TD"]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-allowed-modules = ["types"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "pydantic.root_validator",
+    "pydantic.validator",
+    "pydantic.field_validator"
+]
