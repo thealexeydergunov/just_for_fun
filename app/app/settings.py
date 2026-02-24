@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     API_VERSION: str = "v1"
     LOG_LEVEL: str = "info"
     REQUEST_SEMAPHORE: int = 450
+    API_AUTH_KEY: str = "0000"
 
     PG: PGSettings = PGSettings()
 

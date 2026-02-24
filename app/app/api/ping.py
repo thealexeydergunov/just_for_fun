@@ -4,6 +4,6 @@ from starlette import status
 router = APIRouter(prefix="/ping", tags=["ping"])
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, description="Readiness, liveness probes")
 async def ping() -> dict:
     return {"success": True}
