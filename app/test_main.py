@@ -1,5 +1,6 @@
 import asyncio
 
-from tests.load_fake_data import load
+from tests.load_fake_data import load_fake_data
 
-asyncio.run(load())
+if __name__ == "__main__":
+    asyncio.run(load_fake_data())

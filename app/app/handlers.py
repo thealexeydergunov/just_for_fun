@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse
 
-from app.exceptions import DBNotFoundError
+from app.exceptions import CustomValidationError, DBNotFoundError
 
 
 def setup_handlers(app: FastAPI) -> FastAPI:
@@ -23,6 +23,13 @@ def setup_handlers(app: FastAPI) -> FastAPI:
         return ORJSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"status": "error", "message": "Validation Error", "details": errors},
+        )
+
+    @app.exception_handler(CustomValidationError)
+    async def custom_validation_handler(request: Request, exc: CustomValidationError) -> ORJSONResponse:  # noqa: ARG001
+        return ORJSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": exc.msg},
         )
 
     return app

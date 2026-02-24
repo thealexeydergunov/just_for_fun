@@ -1,8 +1,8 @@
-"""Init tables
+"""init tables
 
-Revision ID: cfdbb32f1f66
+Revision ID: cd870344a260
 Revises:
-Create Date: 2026-02-24 06:43:29.710895
+Create Date: 2026-02-24 09:02:06.902904
 
 """
 
@@ -13,7 +13,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "cfdbb32f1f66"
+revision: str = "cd870344a260"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -34,10 +34,56 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
+        "city",
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(length=256), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "street",
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(length=256), nullable=False),
+        sa.Column("city_id", sa.BigInteger(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["city_id"],
+            ["city.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "building",
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(length=256), nullable=False),
+        sa.Column("street_id", sa.BigInteger(), nullable=False),
+        sa.Column("latitude", sa.Numeric(), nullable=False),
+        sa.Column("longitude", sa.Numeric(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["street_id"],
+            ["street.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "organisation_address",
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("building_id", sa.BigInteger(), nullable=False),
+        sa.Column("office", sqlmodel.sql.sqltypes.AutoString(length=128), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["building_id"],
+            ["building.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
         "organisation",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("type", sa.Enum("LLC", "IP", name="organisationtypes"), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(length=256), nullable=False),
+        sa.Column("address_id", sa.BigInteger(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["address_id"],
+            ["organisation_address.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -75,5 +121,9 @@ def downgrade() -> None:
     op.drop_table("phone")
     op.drop_table("organisation_activity")
     op.drop_table("organisation")
+    op.drop_table("organisation_address")
+    op.drop_table("building")
+    op.drop_table("street")
+    op.drop_table("city")
     op.drop_table("activity")
     # ### end Alembic commands ###
