@@ -7,6 +7,7 @@ from sqlmodel import func, select, union_all
 from app.exceptions import OrganisationNotFoundError
 from app.models.activities import ActivityModel
 from app.models.buildings import BuildingModel, StreetModel
+from app.models.common import PaginatedResponseModel, PaginatorModel
 from app.models.organisations import (
     ActivityResponseModel,
     OrganisationActivityModel,
@@ -54,8 +55,8 @@ class OrganisationsService:
         return statement
 
     async def get_list(
-        self, session: AsyncSession, data_filter: OrganisationFilterModel
-    ) -> list[OrganisationListResponseModel]:
+        self, session: AsyncSession, data_filter: OrganisationFilterModel, paginator: PaginatorModel
+    ) -> PaginatedResponseModel[OrganisationListResponseModel]:
         statement = select(OrganisationModel)
         if data_filter.latitude_from:
             statement = statement.join(OrganisationAddressModel).join(
@@ -82,8 +83,18 @@ class OrganisationsService:
         if data_filter.name:
             statement = statement.where(func.lower(OrganisationModel.name).like(f"%{data_filter.name.lower()}%"))
 
+        statement = (
+            statement.order_by(OrganisationModel.name)
+            .limit(paginator.size)
+            .offset((paginator.page - 1) * paginator.size)
+        )
+
         result = (await session.execute(statement)).scalars().all()
-        return [OrganisationListResponseModel(**elm.model_dump()) for elm in result]
+        return PaginatedResponseModel(
+            page=paginator.page,
+            size=paginator.size,
+            items=[OrganisationListResponseModel(**elm.model_dump()) for elm in result],
+        )
 
     @staticmethod
     async def get_detail(session: AsyncSession, organisation_id: int) -> OrganisationDetailResponseModel:

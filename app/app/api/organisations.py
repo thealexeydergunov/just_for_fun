@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header
 from starlette import status
 
 from app.auth import get_api_key
+from app.models.common import PaginatedResponseModel, PaginatorModel
 from app.models.organisations import (
     OrganisationDetailResponseModel,
     OrganisationFilterModel,
@@ -18,16 +19,17 @@ router = APIRouter(prefix="/organisations", tags=["organisations"], dependencies
 @router.get(
     "/",
     status_code=status.HTTP_200_OK,
-    response_model=list[OrganisationListResponseModel],
+    response_model=PaginatedResponseModel[OrganisationListResponseModel],
     description="Get organisation list",
 )
 async def organisations_list(
     data_filter: Annotated[OrganisationFilterModel, Depends()],
+    paginator: Annotated[PaginatorModel, Depends()],
     session: Annotated[AsyncSession, Depends(get_session)],
     _: str = Header(alias="X-AUTH-KEY"),
-) -> list[OrganisationListResponseModel]:
+) -> PaginatedResponseModel[OrganisationListResponseModel]:
     service = get_organisations_service()
-    response = await service.get_list(session=session, data_filter=data_filter)
+    response = await service.get_list(session=session, data_filter=data_filter, paginator=paginator)
     return response
 
 
