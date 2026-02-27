@@ -39,7 +39,7 @@ services:
   tester:
     build:
       context: ./app
-      dockerfile: Dockerfile-test
+      dockerfile: Dockerfile-dev
     command: [ "test_main.py" ]
     restart: on-failure
     environment:
