@@ -1,21 +1,21 @@
 FROM python:3.13.11-trixie AS builder
 
-WORKDIR /usr/src/app
-ENV PATH="/opt/venv/bin:$PATH"
-COPY .python-version pyproject.toml uv.lock /usr/src/app/
-RUN python -m venv /opt/venv && \
-    pip install uv && \
-    uv export --no-dev --format requirements-txt -o requirements.txt
-#    uv pip compile pyproject.toml -o requirements.txt
+ENV PATH="/venv/bin:$PATH"
+RUN python -m venv /venv && \
+    pip install --upgrade pip && \
+    pip install uv
 
-FROM python:3.13.11-trixie
+WORKDIR /app
+COPY .python-version pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --compile-bytecode --link-mode=copy
 
-WORKDIR /usr/src/app
-ENV PATH="/opt/venv/bin:$PATH"
-COPY --from=builder /usr/src/app/requirements.txt /usr/src/app/requirements.txt
-RUN python -m venv /opt/venv && \
-    pip install -r requirements.txt && \
-    rm requirements.txt
-COPY . /usr/src/app
+FROM gcr.io/distroless/python3-debian13
+WORKDIR /app
+ENV PYTHONPATH="/app/.venv/lib/python3.13/site-packages" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+COPY --from=builder /app/.venv /app/.venv
+COPY . /app
 EXPOSE 8000
-CMD ["python3", "./main.py"]
+CMD ["main.py"]
