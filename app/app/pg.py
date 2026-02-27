@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from app.settings import PGSettings, get_settings
 
 
-def pg_engine(pg_settings: PGSettings) -> AsyncEngine:
+def pg_engine(pg_settings: PGSettings, log_level: str) -> AsyncEngine:
     return create_async_engine(
         pg_settings.db_url,
         pool_size=pg_settings.POOL_MINSIZE,
@@ -15,14 +15,14 @@ def pg_engine(pg_settings: PGSettings) -> AsyncEngine:
         pool_timeout=pg_settings.POOL_TIMEOUT,
         pool_recycle=pg_settings.POOL_RECYCLE,
         pool_pre_ping=True,
-        echo=True,
+        echo=log_level == "debug",
     )
 
 
 @lru_cache
 def get_pg_engine() -> AsyncEngine:
     settings = get_settings()
-    return pg_engine(pg_settings=settings.PG)
+    return pg_engine(pg_settings=settings.PG, log_level=settings.LOG_LEVEL)
 
 
 @lru_cache

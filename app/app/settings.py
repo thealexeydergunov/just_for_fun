@@ -1,6 +1,7 @@
 from functools import lru_cache
+from typing import Annotated, Literal
 
-from pydantic import computed_field
+from pydantic import BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,11 +24,17 @@ class PGSettings(BaseSettings):
         return f"postgresql+asyncpg://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.NAME}"
 
 
+LogLevel = Annotated[
+    Literal["debug", "info", "warning", "error", "critical", "trace"],
+    BeforeValidator(lambda v: str(v).strip().lower() if v else v),
+]
+
+
 class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     API_VERSION: str = "v1"
-    LOG_LEVEL: str = "info"
+    LOG_LEVEL: LogLevel = "info"
     REQUEST_SEMAPHORE: int = 450
     API_AUTH_KEY: str = "0000"
 
