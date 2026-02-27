@@ -25,4 +25,4 @@ setup_middlewares(app)
 setup_handlers(app)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.HOST, port=settings.PORT, log_level=settings.LOG_LEVEL)
+    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, log_level=settings.LOG_LEVEL, reload=settings.LOG_LEVEL == "debug")

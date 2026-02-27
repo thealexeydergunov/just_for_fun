@@ -43,6 +43,7 @@ services:
     command: [ "test_main.py" ]
     restart: on-failure
     environment:
+      APP_LOG_LEVEL: debug
       LOAD_FAKE_DATA: 1
     depends_on:
       db:
